@@ -1,5 +1,6 @@
 import os
 import streamlit as st
+from PIL import Image
 
 st.set_page_config(
     page_title="Třídič fotek",
@@ -63,7 +64,30 @@ if input_folder and output_folder:
                         st.session_state.current_index += 1
                         st.rerun()
             try:
-                st.image(current_file, caption=os.path.basename(current_file), use_container_width=True)
+                cols_image = st.columns(3)
+                cols_image[1].image(current_file, caption=os.path.basename(current_file), width=500)
+                if st.button("Zobrazit větší obrázek", key="view_large"):
+                    st.image(current_file, caption=os.path.basename(current_file), use_container_width=True)
+                cols_rotate = st.columns(2)
+                if cols_rotate[0].button("Rotate Left", use_container_width=True, help="Rotate -90°", key="rotate_left"):
+                    try:
+                        img = Image.open(current_file)
+                        rotated_img = img.rotate(90, expand=True)
+                        rotated_img.save(current_file)
+                        st.toast("Obrázek byl otočen o -90°.", icon="🔄")
+                        st.rerun()
+                    except Exception as rotate_error:
+                        st.error(f"Error rotating image: {rotate_error}")
+
+                if cols_rotate[1].button("Rotate Right", use_container_width=True, help="Rotate +90°", key="rotate_right"):
+                    try:
+                        img = Image.open(current_file)
+                        rotated_img = img.rotate(-90, expand=True)
+                        rotated_img.save(current_file)
+                        st.toast("Obrázek byl otočen o 90°.", icon="🔄")
+                        st.rerun()
+                    except Exception as rotate_error:
+                        st.error(f"Error rotating image: {rotate_error}")
             except Exception as e:
                 st.error(f"Error loading image: {e}")
         else:
